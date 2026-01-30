@@ -1,27 +1,27 @@
 name: Refresh Stock Data
 on:
   schedule:
-    - cron: '0 * * * *' # Runs every hour
-  workflow_dispatch: # This adds a button so you can run it manually
+    - cron: '0 * * * *'
+  workflow_dispatch:
 jobs:
-  build:
+  run-bot:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      - name: Install dependencies
-        run: pip install requests
-      - name: Run script
+      - name: Get Data
+        run: |
+          pip install requests
+          python update_stocks.py
         env:
           FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
-        run: python update_stocks.py
-      - name: Commit data
+      - name: Save to Repo
         run: |
           git config --global user.name 'StockBot'
           git config --global user.email 'bot@github.com'
           git add data.json
-          git commit -m "Auto-update stock data" || exit 0
+          git commit -m "Updated stocks" || exit 0
           git push
